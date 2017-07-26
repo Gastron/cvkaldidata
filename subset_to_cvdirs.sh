@@ -14,7 +14,7 @@ cvdir="$2"
 
 [ -f ./path.sh ] && . ./path.sh
 
-for foldfile in "$cvdir"/*; do
+for foldfile in "$cvdir"/folds/*; do
     folddir="$cvdir"/$(basename "$foldfile")
     mkdir "$folddir"
     #This is a Kaldi utility script:
