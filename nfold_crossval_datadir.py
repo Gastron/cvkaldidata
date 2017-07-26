@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 import random
+import os, os.path
 
 def readIdentifiers(idfile):
     ids = []
@@ -13,7 +14,7 @@ def readIdentifiers(idfile):
 
 def divideToFolds(ids, n):
     if len(ids) < n:
-        raise RuntimeError("The number of folds cannot be larger than the number of samples")
+        raise RuntimeError("The number of folds cannot be larger than the number of utterances")
     #Note that we also shuffle the samples:
     random.shuffle(ids)
     folds = {}
@@ -28,11 +29,15 @@ def divideToFolds(ids, n):
                 folds[foldnum]["train"].append(identifier)
     return folds
 
-def writeFolds(folds, outfileprefix):
+def writeFolds(folds, outdir):
+    #Here os.makedirs will raise an error if outdir already exists.
+    #It's a non-robust guard against overwriting, a friendly "Are you sure?"
+    foldsoutdir = os.path.join(outdir, "folds")
+    os.makedirs(foldsoutdir) 
     for foldnum, fold in folds.items():
-        trainoutpath = outfileprefix + "_" + str(foldnum) + "_train"
+        trainoutpath = os.path.join(foldsoutdir, str(foldnum) + "_train")
         trainfold = "\n".join(fold["train"])
-        testoutpath = outfileprefix + "_" + str(foldnum) + "_test"
+        testoutpath = os.path.join(foldsoutdir, str(foldnum) + "_test")
         testfold = "\n".join(fold["test"])
         with open(trainoutpath, "w") as fo:
             fo.write(trainfold)
@@ -42,15 +47,15 @@ def writeFolds(folds, outfileprefix):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="""
-    Take a file where the first column has identifiers for samples.
-    Create two files for each cross validation fold:
+    Take a file where the first column has identifiers for utterances.
+    Create a directory where there are two files for each cross validation fold:
     one for that fold's validation data and one for the learning data.
     These files have just one column with the right identifiers.
     """)
     parser.add_argument("idfile", help="File with identifiers in the first column")
     parser.add_argument("n", help="Number of folds", type=int)
-    parser.add_argument("outfileprefix", help="String to prefix outfiles with.")
+    parser.add_argument("outdir", help="String to prefix outfiles with.")
     args = parser.parse_args()
     ids = readIdentifiers(args.idfile)
     folds = divideToFolds(ids, args.n)
-    writeFolds(folds, args.outfileprefix)
+    writeFolds(folds, args.outdir)
