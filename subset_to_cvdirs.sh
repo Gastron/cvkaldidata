@@ -14,8 +14,9 @@ cvdir="$2"
 
 [ -f ./path.sh ] && . ./path.sh
 
+mkdir "$cvdir"/data
 for foldfile in "$cvdir"/folds/*; do
-    folddir="$cvdir"/$(basename "$foldfile")
+    folddir="$cvdir"/data/$(basename "$foldfile")
     mkdir "$folddir"
     #This is a Kaldi utility script:
     utils/subset_data_dir.sh --utt-list "$foldfile" "$indir" "$folddir"
